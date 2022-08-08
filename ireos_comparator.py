@@ -4,15 +4,16 @@ Created on Fri Jul  1 15:47:51 2022
 
 @author: ExoFlare
 """
+import os
 import pandas as pd
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-base_path = 'H:\\Studium\\Master\\Diplomarbeit\\repository\\FIREOS\\'
+base_path = os.getcwd()
 
-julia_extension = 'results\\ireos\\'
-java_extension = 'results\\ireos_java\\'
+julia_extension = '/results/ireos/'
+java_extension = '/results/ireos_java/'
 
 # set dataset
 dataset_name = 'complex_1'

@@ -4,6 +4,7 @@ Created on Fri Jul 29 16:14:38 2022
 
 @author: ExoFlare
 """
+import os
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
@@ -11,10 +12,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 
-# Paths need to be adjusted
-base_dir = 'H:/Studium/Master/Diplomarbeit/repository/FIREOS/'
-data_dir = 'data/'
-results_dir = 'results/'
+
+base_dir = os.getcwd()
+data_dir = '/data/'
+results_dir = '/results/'
 ireos_java_dir = 'ireos_java/'
 ireos_dir = 'ireos/'
 

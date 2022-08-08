@@ -4,7 +4,7 @@ Created on Fri Aug  5 11:43:25 2022
 
 @author: ExoFlare
 """
-
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,8 +23,8 @@ datasets = ['complex_1', 'complex_2', 'complex_3', 'complex_4', 'complex_5', 'co
 	'low-noise_10', 'low-noise_11', 'low-noise_12', 'low-noise_13', 'low-noise_14', 'low-noise_15', 'low-noise_16', 
     'low-noise_17', 'low-noise_18', 'low-noise_19', 'low-noise_20']
 
-base_dir = 'H:/Studium/Master/Diplomarbeit/repository/FIREOS/'
-results_dir = 'results/'
+base_dir = os.getcwd()
+results_dir = '/results/'
 ireos_java_dir = 'ireos_java/'
 ireos_dir = 'ireos/'
 

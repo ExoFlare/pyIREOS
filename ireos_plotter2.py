@@ -4,11 +4,13 @@ Created on Mon May 23 23:14:23 2022
 
 @author: ExoFlare
 """
+
+import os
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('H:/Studium/Master/Diplomarbeit/repository/FIREOS/wbc_results.csv')
+df = pd.read_csv(os.getcwd() + '/wbc_results.csv')
 
 
 sns.boxplot(x="clf", y="mae", hue="adaptive_quads_enabled", data=df)
@@ -25,7 +27,7 @@ dt = df[(df['clf'] == 'decision_tree') & (df['adaptive_quads_enabled'] == False)
 df_2 = pd.concat([klr, svc, logreg, libsvm, liblinear, dt])
 sns.boxplot(x="clf", y="mae", hue="window_ratio", data=df_2).set(title='MAE of different models having multiple window sizes to IREOS-Java implementation')
 
-df = pd.read_csv('H:/Studium/Master/Diplomarbeit/repository/FIREOS/test2.csv')
+df = pd.read_csv(os.getcwd() + '/test2.csv')
 
 # filter SVM results
 svc = df[(df['clf'] == 'svc')]
