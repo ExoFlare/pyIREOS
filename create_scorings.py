@@ -28,7 +28,6 @@ import pandas as pd
 
 from sklearn.metrics.cluster import adjusted_mutual_info_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import pairwise_distances
 
 from pyod.models.abod import ABOD
 from pyod.models.hbos import HBOS
@@ -43,14 +42,14 @@ from pysdo import SDO
 from indices import get_indices
 import logging
 
-import sys
 
 data_path = os.getcwd() + '/data/'
 
-np.random.seed(100)
+np.random.seed(123)
+seed = 123
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
 )
@@ -65,7 +64,7 @@ def hbos(c):
     return model
 
 def iforest(c):
-    model = IForest(contamination=c, random_state=100)
+    model = IForest(contamination=c, random_state=seed)
     return model
 
 def knn(c):
@@ -73,7 +72,7 @@ def knn(c):
     return model
 
 def lof(c):
-    model = LOF(contamination=c, n_neighbors=35)
+    model = LOF(contamination=c)
     return model
 
 def ocsvm(c):
@@ -81,7 +80,7 @@ def ocsvm(c):
     return model
 
 def sdo(c):
-    model = SDO(contamination=c, return_scores=True)
+    model = SDO(contamination=c, random_state=seed, return_scores=True)
     return model
 
 def select_algorithm(argument,k):
@@ -100,7 +99,7 @@ data_names =['complex_1', 'complex_2', 'complex_3', 'complex_4', 'complex_5', 'c
     'dens-diff_17', 'dens-diff_18', 'dens-diff_19', 'dens-diff_20',
 	'low-noise_1', 'low-noise_2', 'low-noise_3', 'low-noise_4', 'low-noise_5', 'low-noise_6', 'low-noise_7', 'low-noise_8', 'low-noise_9',
 	'low-noise_10', 'low-noise_11', 'low-noise_12', 'low-noise_13', 'low-noise_14', 'low-noise_15', 'low-noise_16', 
-    'low-noise_17', 'low-noise_18', 'low-noise_19', 'low-noise_20']
+    'low-noise_17', 'low-noise_18', 'low-noise_19', 'low-noise_20', 'separated_20']
 
 algs = ["sdo","abod", "hbos", "iforest", "knn", "lof", "ocsvm"]
 df_columns = ["adj_Patn", "adj_maxf1", "adj_ap", "auc", "AMI"]
@@ -130,12 +129,17 @@ for d_ind, d_name in enumerate(data_names):
     ### OUTLIER DET. ALGORITHMS 
 
     scorings = pd.DataFrame(columns=algs)
+    external_val_results = pd.DataFrame(columns=df_columns,index=pd.MultiIndex.from_product([[d_name],algs], names=['Data', 'Alg.']))
     for a_name in algs:
 
         print("-----------------------------")
         print("Algorithm:", a_name)
 
-        algorithm = select_algorithm(a_name,outliers_fraction)
+        try:
+             algorithm = select_algorithm(a_name,outliers_fraction)
+        except ValueError:
+             print('Error in dataset' + d_name + 'Algorithm:' + a_name + ' outliers_fraction is ' + str(outliers_fraction) + ' Skipping...')
+             continue
         algorithm.fit(X)
         if a_name == "sdo":
             scores = algorithm.predict(X)
@@ -155,6 +159,13 @@ for d_ind, d_name in enumerate(data_names):
         df_val.loc[(d_name,a_name), 'auc'] = RES['auc']
         df_val.loc[(d_name,a_name), 'AMI'] = AMI
         
+        # evaluate scores of algorithm and set validation scores
+        external_val_results.loc[(d_name,a_name), 'adj_Patn'] = RES['adj_Patn']
+        external_val_results.loc[(d_name,a_name), 'adj_maxf1'] = RES['adj_maxf1']
+        external_val_results.loc[(d_name,a_name), 'adj_ap'] = RES['adj_ap']
+        external_val_results.loc[(d_name,a_name), 'auc'] = RES['auc']
+        external_val_results.loc[(d_name,a_name), 'AMI'] = AMI
+        
         
         print("Adj P@n: ", RES['adj_Patn'])
         print("Adj MaxF1: ", RES['adj_maxf1'])
@@ -162,9 +173,13 @@ for d_ind, d_name in enumerate(data_names):
         print("Adj ROC-AUC: ", RES['auc'])
         print("Adj AMI: ", AMI)
         print("-----------------------------\n")
-        scorings.to_csv(os.getcwd() + '/scores/' + d_name +'.csv', index=False)
+        
+    # set dataframe for each dataset
+    scorings.to_csv(os.getcwd() + '/scores/' + d_name +'.csv', index=False)
+    external_val_results.to_csv(os.getcwd() + '/results/external_validation_indices/' + d_name +'.csv')
 
-#df_val.to_csv('scorings__all.csv')
+# save dataframe where all scorings are in one file
+df_val.to_csv(os.getcwd() + '/results/external_validation_indices/all/' + 'scorings__all.csv')
 
 
 
